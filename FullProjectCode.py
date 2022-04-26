@@ -137,7 +137,6 @@ print(thetas)
 # this function recursively generates the circuit like Fig. 2 in quant-ph/0404089
 # except for the last CNOT gate - it should be added manually (with this prescription the
 # iterative structure becomes particularly simple)
-# RZ rotations can be replaced with RY rotations that are used in HHL algorithm
 def MultiControlRotation(athetas) :
 	l = len(athetas)
 	rl = int(log2(l))
@@ -145,7 +144,6 @@ def MultiControlRotation(athetas) :
 	if l==2 :
 		QC.ry(-2.0*athetas[0], n) #We just want exp(i*theta) in the rotation operator, 
 		#CRZ defined as diag(exp(-i*lambda/2), exp(i*lambda/2))
-		#For HHL algorithm, this should be QC.ry
 		QC.cnot(n-1, n)
 		QC.ry(-2.0*athetas[1], n)
 	else :
