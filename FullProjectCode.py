@@ -183,3 +183,14 @@ print(A," ",bsrc)
 sol = np.linalg.solve(A, bsrc)
 print(sol)
 
+#We calculate the elements of the reduced density matrix for the target qubit
+for i in range(len(psi)) :
+	for j in range(len(psi)) :
+		ib =np.full(n+2, 0, dtype=int)
+		jb =np.full(n+2, 0, dtype=int)
+		bin_list(i, ib)
+		bin_list(j, jb)
+		if (first n elements in ib and jb are equal)
+			rho[ ib[n], jb[n] ] += conj(psi[i])*psi[j]
+	
+
