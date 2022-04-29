@@ -65,9 +65,9 @@ print("Matrix A:")
 print(A)
 
 #Preparing the |b> state:
-a = np.random.rand()*2*pi #Generates a random number between (0,2pi)
-b = [np.cos(a/2),np.sin(a/2)]
-print(b)
+a    = np.random.rand()*2*pi #Generates a random number between (0,2pi)
+bsrc = np.array([np.cos(a/2),np.sin(a/2)])
+print(bsrc)
 print()
 QC.ry(a, n+1) # Encodes b vector in the final qubit in the circuit
 
@@ -82,12 +82,9 @@ for i in range(n):
 QFTC = QFT(n, inverse=True)
 QC.compose(QFTC, range(n), inplace=True) # Adds Inverse QFT onto the first qubits of the circuit
 
-
 #Get eigenvalues using NumPy
 evals, evecs = np.linalg.eig(A)
 print("Eigenvalues of h: ", evals[0], ", ", evals[1])
-
-
 
 def bin_list(i, out) :
 	for j in range(len(out)) :
@@ -161,8 +158,8 @@ QC.measure(n, 0)
 QFTC = QFT(n, inverse=False)
 QC.compose(QFTC, range(n), inplace=True) 
 for i in range(n):
-    ph = pi*A*(2**(-n+i+1)) #Explicit argument for the matrix exponent
-    ControlledMatrixExpGate(ph, i, n+1,inverse=True) #n+1 is the index of the last qubit of n+2 qubits
+	ph = pi*A*(2**(-n+i+1)) #Explicit argument for the matrix exponent
+	ControlledMatrixExpGate(ph, i, n+1,inverse=True) #n+1 is the index of the last qubit of n+2 qubits
 
 
 #Running the circuit
@@ -172,7 +169,14 @@ QC.save_statevector()
 result = sim.run(QC).result()
 psi = result.get_statevector()
 for i in range(len(psi)):
-    ib =np.full(n+2, 0, dtype=int)
-    bin_list(i, ib)
-    print(ib," ", psi[i])
-#print(QC.ClassicalRegister.bits)
+	ib =np.full(n+2, 0, dtype=int)
+	bin_list(i, ib)
+	if abs(psi[i])>0.001 :
+		print(ib," ", psi[i])
+	
+print()
+#Print out the exact solution
+print(A," ",bsrc)
+sol = np.linalg.solve(A, bsrc)
+print(sol)
+
