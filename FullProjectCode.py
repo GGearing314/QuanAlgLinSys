@@ -185,9 +185,7 @@ while not success:
             else:
                 break
             
-counts = result.get_counts()
-plot_histogram(counts,filename="solution")
-print()
+
 #Print out the exact solution
 print(A," ",bsrc)
 sol = np.linalg.solve(A, bsrc)
@@ -200,7 +198,7 @@ for i in range(len(psi)) :
 		jb =np.full(n+2, 0, dtype=int)
 		bin_list(i, ib)
 		bin_list(j, jb)
-		if (first n elements in ib and jb are equal)
+		if (ib[:n]==jb[:n]): #compares the counting register values
 			rho[ ib[n], jb[n] ] += conj(psi[i])*psi[j]
 	
 
