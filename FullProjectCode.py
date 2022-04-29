@@ -18,51 +18,54 @@ pi = np.pi
 #Functions:
     
 def generate_matrix(): #Generates a random 2x2 matrix and ensures that it is symmetric to satify our condition for Hermiticity
-    h = np.random.rand(2,2) #
-    return 10.0*(h + h.transpose()) #This forces the matrix to be symmetric
+	h = np.random.rand(2,2) #
+	return 10.0*(h + h.transpose()) #This forces the matrix to be symmetric
 
 #define our implementation of the controlled Matrix Exp gate Exp(i*h)
 #ah is a 2x2 matrix
 #c is the number of the control Qubit in QC
 #t is the number of target qubit
 def ControlledMatrixExpGate(ah, c, t,inverse=False) :
-    #inverse: (ah)->(-ah) and reverse order of the rotations.
-    
-    #We write our real-valued 2x2 matrix h = [[h00, h01], [h10, h11]] as v0*Id + vx*sigma_x + vy*sigma_y + vz*sigma_z
-    #Id is the 2x2 identity matrix, sigma_{x,y,z} are the Pauli matrices
-    #We assume the symmetric matrix with h01 = h10. This is enforced in the code, any asymmetry will be ignored
-    if inverse: # Reverses sign of matrix
-        ah=-ah
-    v0 = 0.5*(ah[0,0] + ah[1,1])
-    vx = 0.5*(ah[0,1] + ah[1,0])
-    vy = 0.0 #For real-valued matrices, vy = 0
-    vz = 0.5*(ah[0,0] - ah[1,1])
-    
-    #Norm of v - without v0
-    nv = sqrt(vx*vx + vy*vy + vz*vz)
-    #Normalizing the vector components
-    nvx = vx/nv; nvz = vz/nv; nvy = vy/nv;
-    theta = 2*acos(sqrt(cos(nv)*cos(nv) + nvz*nvz*sin(nv)*sin(nv)))
-    lpf = 2*phase(complex(cos(nv), -nvz*sin(nv)))
-    lmf = 2*phase(complex(-nvy*sin(nv)/sin(theta/2), -nvx*sin(nv)/sin(theta/2)))
-    l = 0.5*(lpf + lmf)
-    f = 0.5*(lpf - lmf)
-    glob_phase = l+f - 2*v0
-    if inverse: #Reverse order of rotations
-        QC.cu1(-glob_phase, c, t)
-        QC.crz( glob_phase, c, t) #This is to get all phase factors right
-        QC.cu3(theta, f, l, c, t)
-    else: #Normal version
-        QC.cu3(theta, f, l, c, t)
-        QC.crz( glob_phase, c, t) #This is to get all phase factors right
-        QC.cu1(-glob_phase, c, t)
-        
+	#inverse: (ah)->(-ah) and reverse order of the rotations.
+	#We write our real-valued 2x2 matrix h = [[h00, h01], [h10, h11]] as v0*Id + vx*sigma_x + vy*sigma_y + vz*sigma_z
+	#Id is the 2x2 identity matrix, sigma_{x,y,z} are the Pauli matrices
+	#We assume the symmetric matrix with h01 = h10. This is enforced in the code, any asymmetry will be ignored
+	if inverse: # Reverses sign of matrix
+		ah=-ah
+	v0 = 0.5*(ah[0,0] + ah[1,1])
+	vx = 0.5*(ah[0,1] + ah[1,0])
+	vy = 0.0 #For real-valued matrices, vy = 0
+	vz = 0.5*(ah[0,0] - ah[1,1])
+	#Norm of v - without v0
+	nv = sqrt(vx*vx + vy*vy + vz*vz)
+	#Normalizing the vector components
+	nvx = vx/nv; nvz = vz/nv; nvy = vy/nv;
+	theta = 2*acos(sqrt(cos(nv)*cos(nv) + nvz*nvz*sin(nv)*sin(nv)))
+	print("theta  = ",theta)
+	lpf = 2*phase(complex(cos(nv), -nvz*sin(nv)))
+	lmf = 2*phase(complex(-nvy*sin(nv)/sin(theta/2), -nvx*sin(nv)/sin(theta/2)))
+	l = 0.5*(lpf + lmf)
+	f = 0.5*(lpf - lmf)
+	glob_phase = l+f - 2*v0
+	if inverse: #Reverse order of rotations
+		QC.cu1(-glob_phase, c, t)
+		QC.crz( glob_phase, c, t) #This is to get all phase factors right
+		QC.cu3(theta, f, l, c, t)
+	else: #Normal version
+		QC.cu3(theta, f, l, c, t)
+		QC.crz( glob_phase, c, t) #This is to get all phase factors right
+		QC.cu1(-glob_phase, c, t)
+
+
 #Generate a random Matrix:
 A = generate_matrix()
 while np.linalg.det(A)==0: #Ensures the random matrix can represent a solvable system of equations
     A=generate_matrix()
 print("Matrix A:")
 print(A)
+
+#Let's use a matrix with positive and integer eigenvalues
+#A = np.array([[11.0, 4.0],[4.0, 5.0]])
 
 #Preparing the |b> state:
 a    = np.random.rand()*2*pi #Generates a random number between (0,2pi)
@@ -73,11 +76,11 @@ QC.ry(a, n+1) # Encodes b vector in the final qubit in the circuit
 
 #Quantum Phase Estimation:
 for i in range(n) : #Apply hadamard gates to counting qubits
-    QC.h(i)
+	QC.h(i)
 
 for i in range(n):
-    ph = pi*A*(2**(-n+i+1)) #Explicit argument for the matrix exponent
-    ControlledMatrixExpGate(ph, i, n+1) #n+1 is the index of the last qubit of n+2 qubits
+	ph = pi*A*(2**(-n+i+1)) #Explicit argument for the matrix exponent
+	ControlledMatrixExpGate(ph, i, n+1) #n+1 is the index of the last qubit of n+2 qubits
 
 QFTC = QFT(n, inverse=True)
 QC.compose(QFTC, range(n), inplace=True) # Adds Inverse QFT onto the first qubits of the circuit
@@ -171,7 +174,7 @@ psi = result.get_statevector()
 for i in range(len(psi)):
 	ib =np.full(n+2, 0, dtype=int)
 	bin_list(i, ib)
-	if abs(psi[i])>0.001 :
+	if abs(psi[i])>0.000001 :
 		print(ib," ", psi[i])
 	
 print()
