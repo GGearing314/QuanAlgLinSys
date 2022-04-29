@@ -193,33 +193,31 @@ print(sol)
 
 #We calculate the elements of the reduced density matrix for the target qubit
 rho = [[0,0],[0,0]]
-count_1=0 #testing how many additions are actually made
-for i in range(len(psi)) :
-    for j in range(len(psi)) :
-        ib =np.full(n+2, 0, dtype=int)
-        jb =np.full(n+2, 0, dtype=int)
-        bin_list(i, ib)
-        bin_list(j, jb)
-        if (np.array_equal(ib[:n],jb[:n])): #compares the counting register values
-            rho[ib[n+1]][jb[n+1]]+= np.conj(psi[i])*psi[j]
-            count_1+=1
-count_2=0       
+# count_1=0 #testing how many additions are actually made
+# for i in range(len(psi)) :
+#     for j in range(len(psi)) :
+#         ib =np.full(n+2, 0, dtype=int)
+#         jb =np.full(n+2, 0, dtype=int)
+#         bin_list(i, ib)
+#         bin_list(j, jb)
+#         if (np.array_equal(ib[:n],jb[:n])): #compares the counting register values
+#             rho[ib[n+1]][jb[n+1]]+= np.conj(psi[i])*psi[j]
+#             count_1+=1
+            
 for ic in range(2**n):#runs through all counting register combinations
     reg = np.full(n, 0, dtype=int)
     bin_list(ic,reg)
     for x in range(2):
         for y in range(2):
-            ib = np.concatenate(reg,np.asarray([1]),np.asarray([x]))
-            jb = np.concatenate(reg,np.asarray([1]),np.asarray([y]))
+            ib=np.append(reg,[1,x])
+            jb=np.append(reg,[1,y])
             i=ic*4+2+x
             j=ic*4+2+y
             rho[ib[n+1]][jb[n+1]]+= np.conj(psi[i])*psi[j]
-            count_2+=1
             
 print(rho)
 print("Exact solution ratio:",(sol[0]**2)/sol[1]**2)
 print("Actual solution ratio:",abs(rho[0][0]/rho[1][1])) #abs to get rid of 0 complex component in print
-print(count_1,len(psi))
-print(count_2,len(psi))
+
 
 
